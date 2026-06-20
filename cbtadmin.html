@@ -598,10 +598,16 @@
           <div id="qf-datatype-table-area" style="display:none;">
             <textarea id="qf-table-html" placeholder="표 내용을 HTML로 입력하세요. 예) <table><tr><th>구분</th><th>값</th></tr><tr><td>A</td><td>10</td></tr></table>"></textarea>
           </div>
-          <div id="qf-datatype-image-area" style="display:none;">
+         <div id="qf-datatype-image-area" style="display:none;">
             <input type="file" id="qf-image-input" accept="image/*" onchange="handleImageSelect(event)" />
             <img id="qf-image-preview" class="img-preview" />
           </div>
+        </div>
+
+        <div class="form-row" style="background:#f7f9fc;border-radius:10px;padding:.9rem 1rem;border:1.5px solid #e2e8f0;">
+          <label>＋ 추가 박스 (조건·메모 등, 선택사항 / 표·이미지와 같이 넣을 수 있어요)</label>
+          <input type="text" id="qf-box-title" placeholder="박스 제목 (예: 조건) - 비워두면 제목 없이 표시" style="margin-bottom:.5rem;" />
+          <textarea id="qf-box-text" placeholder="한 줄에 하나씩 입력하세요. 자동으로 줄마다 글머리 기호(•)가 붙어요."></textarea>
         </div>
 
         <div class="form-row">
@@ -982,6 +988,8 @@ function resetForm() {
   document.getElementById('qf-setrange').value = '';
   document.getElementById('qf-text').value = '';
   document.getElementById('qf-table-html').value = '';
+  document.getElementById('qf-box-title').value = '';
+  document.getElementById('qf-box-text').value = '';
   document.getElementById('qf-image-input').value = '';
   document.getElementById('qf-image-preview').style.display = 'none';
   document.getElementById('qf-image-preview').src = '';
@@ -1011,18 +1019,28 @@ async function saveQuestion() {
   }
   const answer = parseInt(answerVal);
 
-  let data = '';
+  let mediaOnly = '';
   if (currentDataType === 'table') {
-    data = document.getElementById('qf-table-html').value.trim();
+    mediaOnly = document.getElementById('qf-table-html').value.trim();
   } else if (currentDataType === 'image') {
     if (currentImageDataUri) {
-      data = `<img src="${currentImageDataUri}" alt="문제 자료" style="max-width:100%;border-radius:6px;" />`;
+      mediaOnly = `<img src="${currentImageDataUri}" alt="문제 자료" style="max-width:100%;border-radius:6px;" />`;
     } else if (editingId) {
-      // 수정 중이면서 새 이미지를 선택 안 한 경우, 기존 데이터 유지
       const existing = allQuestions.find(q => q.id === editingId);
-      data = existing ? existing.data : '';
+      mediaOnly = existing ? (existing.mediaOnly !== undefined ? existing.mediaOnly : existing.data) : '';
     }
   }
+
+  const boxTitle = document.getElementById('qf-box-title').value.trim();
+  const boxText = document.getElementById('qf-box-text').value.trim();
+  let boxHtml = '';
+  if (boxText) {
+    const lines = boxText.split('\n').map(l => l.trim()).filter(Boolean);
+    boxHtml = `<div style="border:1.5px solid #333;margin-top:1rem;padding:.8rem 1rem;">` +
+      (boxTitle ? `<div style="text-align:center;font-weight:700;margin-bottom:.6rem;">${boxTitle}</div>` : '') +
+      `<ul style="margin:0;padding-left:1.2rem;line-height:1.8;">${lines.map(l => `<li>${l}</li>`).join('')}</ul></div>`;
+  }
+  const data = mediaOnly + boxHtml;
 
   const saveBtn = document.getElementById('qf-save-btn');
   saveBtn.disabled = true;
@@ -1039,7 +1057,7 @@ async function saveQuestion() {
 
   try {
     const { db, collection, addDoc, updateDoc, doc } = window.__firebase;
-    const payload = { num, cat, setRange, text, data, choices, answer };
+    const payload = { num, cat, setRange, text, data, mediaOnly, boxTitle, boxText, choices, answer };
 
     if (editingId) {
       await updateDoc(doc(db, "questions", editingId), payload);
@@ -1145,21 +1163,26 @@ function editQuestion(id) {
   });
   document.getElementById('qf-answer').value = (q.answer !== undefined && q.answer !== null) ? String(q.answer) : '';
 
-  if (q.data && q.data.includes('<img')) {
+  const media = q.mediaOnly !== undefined ? q.mediaOnly : q.data;
+
+  if (media && media.includes('<img')) {
     setDataType('image');
     const preview = document.getElementById('qf-image-preview');
-    const srcMatch = q.data.match(/src="([^"]+)"/);
+    const srcMatch = media.match(/src="([^"]+)"/);
     if (srcMatch) {
       preview.src = srcMatch[1];
       preview.style.display = 'block';
-      currentImageDataUri = ''; // 새로 고르지 않으면 기존 유지
+      currentImageDataUri = '';
     }
-  } else if (q.data) {
+  } else if (media) {
     setDataType('table');
-    document.getElementById('qf-table-html').value = q.data;
+    document.getElementById('qf-table-html').value = media;
   } else {
     setDataType('none');
   }
+
+  document.getElementById('qf-box-title').value = q.boxTitle || '';
+  document.getElementById('qf-box-text').value = q.boxText || '';
 
   document.getElementById('q-form-title').textContent = `✏️ ${q.num}번 문제 수정`;
   document.getElementById('qf-cancel-btn').style.display = 'inline-block';
