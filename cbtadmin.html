@@ -1200,7 +1200,7 @@ function renderPreviewQuestion(q) {
   const setBadge = document.getElementById('pv-q-setbadge');
   if (q.setRange) {
     setBadge.style.display = 'inline-block';
-    setBadge.textContent = `[${q.setRange}] 세트문제`;
+    setBadge.textContent = q.setRange;
   } else {
     setBadge.style.display = 'none';
   }
