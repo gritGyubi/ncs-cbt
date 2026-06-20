@@ -1036,8 +1036,8 @@ async function saveQuestion() {
   let boxHtml = '';
   if (boxText) {
     const lines = boxText.split('\n').map(l => l.trim()).filter(Boolean);
-    boxHtml = `<div style="border:1.5px solid #333;margin-top:1rem;padding:.8rem 1rem;">` +
-      (boxTitle ? `<div style="text-align:center;font-weight:700;margin-bottom:.6rem;">${boxTitle}</div>` : '') +
+    boxHtml = `<div style="border:1.5px solid #d1d9e6;border-radius:10px;background:#f7f9fc;margin-top:1rem;padding:.9rem 1.1rem;">` +
+      (boxTitle ? `<div style="text-align:center;font-weight:700;color:#1a3a5c;margin-bottom:.6rem;">${boxTitle}</div>` : '') +
       `<ul style="margin:0;padding-left:1.2rem;line-height:1.8;">${lines.map(l => `<li>${l}</li>`).join('')}</ul></div>`;
   }
   const data = mediaOnly + boxHtml;
