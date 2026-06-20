@@ -1111,8 +1111,8 @@ function renderQuestionList() {
       ? `<span style="font-size:.72rem;background:#e6f4ea;color:#2a6f4b;border-radius:12px;padding:2px 9px;margin-left:6px;font-weight:700;">정답 ${labels[q.answer]}</span>`
       : `<span style="font-size:.72rem;background:#fde8e9;color:#e63946;border-radius:12px;padding:2px 9px;margin-left:6px;font-weight:700;">정답 미입력</span>`;
     const setBadge = q.setRange
-      ? `<span style="font-size:.72rem;background:#eef1f5;color:#6b7a8d;border-radius:12px;padding:2px 9px;margin-left:6px;font-weight:700;">[${q.setRange}] 세트</span>`
-      : '';
+  ? `<span style="font-size:.72rem;background:#eef1f5;color:#6b7a8d;border-radius:12px;padding:2px 9px;margin-left:6px;font-weight:700;">${q.setRange.length > 20 ? q.setRange.slice(0,20) + '...' : q.setRange}</span>`
+  : '';
     return `
       <div class="q-list-item">
         <div class="qi-num">${q.num}</div>
