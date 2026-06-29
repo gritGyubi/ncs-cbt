@@ -82,7 +82,7 @@
     .pw-error { color: #e63946; font-size: .8rem; margin-top: .6rem; display: none; }
 
     /* ── 관리자 화면 ── */
-    #screen-admin { display: none; }
+    #screen-admin { display: block; }
 
     header {
       background: #1a3a5c;
@@ -468,16 +468,6 @@
 </head>
 <body>
 
-<!-- ── 비밀번호 화면 ── -->
-<div id="screen-pw">
-  <div class="pw-card">
-    <h2>🔒 관리자 화면</h2>
-    <p>접속 비밀번호를 입력해 주세요.</p>
-    <input type="password" id="pw-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')checkPw()" />
-    <button onclick="checkPw()">접속하기</button>
-    <div class="pw-error" id="pw-error">비밀번호가 올바르지 않습니다.</div>
-  </div>
-</div>
 
 <!-- ── 관리자 화면 ── -->
 <div id="screen-admin">
@@ -1290,6 +1280,7 @@ function previewNav(dir) {
 function closePreview() {
   document.getElementById('preview-overlay').classList.remove('open');
 }
+  window.addEventListener('load', () => initAdmin());
 </script>
 </body>
 </html>
